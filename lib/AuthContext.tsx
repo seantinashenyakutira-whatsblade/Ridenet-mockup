@@ -59,6 +59,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         let unsubscribe = () => { };
         try {
+            if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+                // We are in mock mode, so let's mock the user
+                const isMockSignedIn = typeof window !== 'undefined' && localStorage.getItem('mockUser') === 'signed_in';
+                if (isMockSignedIn) {
+                    setUser({ uid: 'mock-123', email: 'admin@ridenet.co.zm', displayName: "Mock Admin" } as User);
+                    setUserData({ name: "Mock Admin", email: "admin@ridenet.co.zm", phone: "+260971234567" });
+                    setIsAdmin(true);
+                } else {
+                    setUser(null);
+                    setUserData(null);
+                    setIsAdmin(false);
+                }
+                setLoading(false);
+                return;
+            }
+
             unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
                 setUser(currentUser);
                 if (currentUser) {
@@ -117,6 +133,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         try {
+            if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+                localStorage.removeItem('mockUser');
+                setUser(null);
+                setUserData(null);
+                setIsAdmin(false);
+                window.location.reload();
+                return;
+            }
             await firebaseSignOut(auth);
         } catch (error) {
             console.error("Sign-out Error:", error);

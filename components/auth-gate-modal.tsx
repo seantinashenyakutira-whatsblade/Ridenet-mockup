@@ -34,6 +34,13 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
 
   const handleEmailSignIn = () => {
     if (email && password.length >= 6) {
+      if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+        localStorage.setItem('mockUser', 'signed_in');
+        onSuccess?.();
+        onClose();
+        window.location.reload();
+        return;
+      }
       onClose()
       onSuccess?.()
     }
