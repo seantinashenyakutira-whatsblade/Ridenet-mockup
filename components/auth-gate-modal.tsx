@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { X, Phone, Mail, Smartphone } from "lucide-react"
+import { useState, useEffect } from "react"
+import { X, Mail, Smartphone } from "lucide-react"
 import Link from "next/link"
 
 type AuthGateProps = {
@@ -11,15 +11,32 @@ type AuthGateProps = {
   message?: string
 }
 
+const isMock = () =>
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+
 export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGateProps) {
-  const [mode, setMode] = useState<"choose" | "phone" | "email">("choose")
+  const [mode, setMode] = useState<"choose" | "phone" | "email" | "signup">("choose")
   const [phone, setPhone] = useState("")
   const [otp, setOtp] = useState("")
   const [otpSent, setOtpSent] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  // Signup fields
+  const [name, setName] = useState("")
+  const [signupEmail, setSignupEmail] = useState("")
+  const [signupPhone, setSignupPhone] = useState("")
+  const [signupAddress, setSignupAddress] = useState("")
+  const [signupPassword, setSignupPassword] = useState("")
 
   if (!open) return null
+
+  const mockSignIn = (role: "admin" | "user" = "user") => {
+    localStorage.setItem("mockUser", "signed_in")
+    localStorage.setItem("mockRole", role)
+    onSuccess?.()
+    onClose()
+    window.location.reload()
+  }
 
   const handleSendOtp = () => {
     if (phone.length >= 9) setOtpSent(true)
@@ -27,29 +44,22 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
 
   const handleVerifyOtp = () => {
     if (otp.length === 6) {
-      localStorage.setItem('mockUser', 'signed_in')
-      localStorage.setItem('mockRole', 'user')  // Phone always = regular user
-      onSuccess?.()
-      onClose()
-      window.location.reload()
+      mockSignIn("user")
     }
   }
 
   const handleEmailSignIn = () => {
     if (email && password.length >= 6) {
-      if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-        localStorage.setItem('mockUser', 'signed_in');
-        // admin@ridenet.co.zm = admin, everything else = regular user
-        const role = email.trim() === 'admin@ridenet.co.zm' ? 'admin' : 'user'
-        localStorage.setItem('mockRole', role);
-        onSuccess?.();
-        onClose();
-        window.location.reload();
-        return;
-      }
-      onClose()
-      onSuccess?.()
+      const role = email.trim() === "admin@ridenet.co.zm" ? "admin" : "user"
+      mockSignIn(role)
     }
+  }
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name || !signupEmail || !signupPhone || signupPassword.length < 6) return
+    // In a real app we'd call Firebase createUserWithEmailAndPassword here
+    mockSignIn("user")
   }
 
   return (
@@ -58,7 +68,7 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="relative w-full max-w-sm bg-card border border-border rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl">
+      <div className="relative w-full max-w-sm bg-card border border-border rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Handle bar */}
         <div className="flex justify-center pt-3 sm:hidden">
           <div className="w-10 h-1 bg-muted rounded-full" />
@@ -68,43 +78,33 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
         <div className="flex items-center justify-between px-5 pt-4 pb-2">
           <div>
             <h2 className="text-base font-bold text-foreground">
-              {mode === "choose" ? "Sign in to continue" : mode === "phone" ? "Phone Verification" : "Sign in with Email"}
+              {mode === "choose" ? "Sign in to continue"
+                : mode === "phone" ? "Phone Verification"
+                  : mode === "signup" ? "Create Account"
+                    : "Sign in with Email"}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               {message || "Create an account or sign in to book & track your services"}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="px-5 pb-6">
+          {/* ── CHOOSE ── */}
           {mode === "choose" && (
             <div className="flex flex-col gap-3 mt-2">
-              {/* Phone OTP */}
-              <button
-                onClick={() => setMode("phone")}
-                className="flex items-center gap-3 w-full bg-primary text-primary-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors"
-              >
+              <button onClick={() => setMode("phone")}
+                className="flex items-center gap-3 w-full bg-primary text-primary-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors">
                 <Smartphone className="w-4 h-4" />
                 Continue with Phone OTP
               </button>
 
-              {/* Google */}
-              <button
-                onClick={() => {
-                  localStorage.setItem('mockUser', 'signed_in')
-                  localStorage.setItem('mockRole', 'user')  // Google = regular user
-                  onSuccess?.()
-                  onClose()
-                  window.location.reload()
-                }}
-                className="flex items-center gap-3 w-full bg-secondary border border-border text-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-muted transition-colors"
-              >
+              <button onClick={() => mockSignIn("user")}
+                className="flex items-center gap-3 w-full bg-secondary border border-border text-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-muted transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -114,101 +114,119 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
                 Continue with Google
               </button>
 
-              {/* Email */}
-              <button
-                onClick={() => setMode("email")}
-                className="flex items-center gap-3 w-full bg-secondary border border-border text-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-muted transition-colors"
-              >
+              <button onClick={() => setMode("email")}
+                className="flex items-center gap-3 w-full bg-secondary border border-border text-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-muted transition-colors">
                 <Mail className="w-4 h-4" />
-                Continue with Email
+                Sign in with Email
+              </button>
+
+              <button onClick={() => setMode("signup")}
+                className="w-full border border-primary/50 text-primary font-semibold text-sm py-2.5 px-4 rounded-xl hover:bg-primary/5 transition-colors">
+                Create an Account
               </button>
 
               <p className="text-xs text-muted-foreground text-center mt-1">
                 By continuing you agree to our{" "}
                 <Link href="/terms" className="text-primary underline cursor-pointer" onClick={onClose}>Terms of Service</Link>
               </p>
+
               {/* Prototype hint */}
               <div className="bg-muted/60 rounded-xl p-3 mt-1 text-[11px] text-muted-foreground space-y-0.5">
                 <p className="font-semibold text-foreground">🧪 Prototype test accounts (Email login):</p>
                 <p>👤 <b>Client:</b> user@test.com / <b>any password</b></p>
                 <p>🔑 <b>Admin:</b> admin@ridenet.co.zm / <b>any password</b></p>
-                <p className="mt-1 opacity-70">Google &amp; Phone → signs in as regular user</p>
+                <p className="mt-1 opacity-70">Google & Phone → signs in as regular user</p>
               </div>
             </div>
           )}
 
+          {/* ── PHONE OTP ── */}
           {mode === "phone" && (
             <div className="flex flex-col gap-3 mt-2">
               {!otpSent ? (
                 <>
                   <div className="flex gap-2">
                     <span className="flex items-center justify-center bg-muted text-foreground text-sm font-semibold rounded-xl px-3 border border-border min-w-[60px]">+260</span>
-                    <input
-                      type="tel"
-                      placeholder="97 123 4567"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
+                    <input type="tel" placeholder="97 123 4567" value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                   </div>
-                  <button
-                    onClick={handleSendOtp}
-                    className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
-                  >
+                  <button onClick={handleSendOtp}
+                    className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors">
                     Send OTP
                   </button>
                 </>
               ) : (
                 <>
                   <p className="text-xs text-muted-foreground">Enter the 6-digit code sent to +260 {phone}</p>
-                  <input
-                    type="text"
-                    placeholder="000000"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="w-full text-center tracking-[0.5em] text-lg font-bold bg-input border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <button
-                    onClick={handleVerifyOtp}
-                    className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
-                  >
+                  <input type="text" placeholder="000000" maxLength={6} value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="w-full text-center tracking-[0.5em] text-lg font-bold bg-input border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <button onClick={handleVerifyOtp}
+                    className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors">
                     Verify & Sign In
                   </button>
                 </>
               )}
-              <button onClick={() => setMode("choose")} className="text-xs text-muted-foreground text-center hover:text-foreground">
-                Back to options
-              </button>
+              <button onClick={() => setMode("choose")} className="text-xs text-muted-foreground text-center hover:text-foreground">← Back</button>
             </div>
           )}
 
+          {/* ── EMAIL SIGN IN ── */}
           {mode === "email" && (
             <div className="flex flex-col gap-3 mt-2">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button
-                onClick={handleEmailSignIn}
-                className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
-              >
+              <input type="email" placeholder="your@email.com" value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              <input type="password" placeholder="Password" value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              <button onClick={handleEmailSignIn}
+                className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors">
                 Sign In
               </button>
-              <button onClick={() => setMode("choose")} className="text-xs text-muted-foreground text-center hover:text-foreground">
-                Back to options
-              </button>
+              <button onClick={() => setMode("choose")} className="text-xs text-muted-foreground text-center hover:text-foreground">← Back</button>
             </div>
+          )}
+
+          {/* ── SIGNUP ── */}
+          {mode === "signup" && (
+            <form onSubmit={handleSignup} className="flex flex-col gap-3 mt-2">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Full Name *</label>
+                <input required placeholder="e.g. James Mwale" value={name} onChange={e => setName(e.target.value)}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Email Address *</label>
+                <input required type="email" placeholder="your@email.com" value={signupEmail} onChange={e => setSignupEmail(e.target.value)}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Phone / WhatsApp *</label>
+                <input required type="tel" placeholder="+260 97 000 0000" value={signupPhone} onChange={e => setSignupPhone(e.target.value)}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Address <span className="text-muted-foreground/60">(optional)</span></label>
+                <input type="text" placeholder="e.g. Lusaka, Zambia" value={signupAddress} onChange={e => setSignupAddress(e.target.value)}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Password * <span className="text-muted-foreground/60">(min 6 chars)</span></label>
+                <input required type="password" placeholder="Choose a password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <button type="submit"
+                className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors">
+                Create Account
+              </button>
+              <p className="text-[10px] text-muted-foreground text-center">
+                By creating an account you agree to our{" "}
+                <Link href="/terms" className="text-primary underline" onClick={onClose}>Terms of Service</Link>
+              </p>
+              <button type="button" onClick={() => setMode("choose")} className="text-xs text-muted-foreground text-center hover:text-foreground">← Back</button>
+            </form>
           )}
         </div>
       </div>

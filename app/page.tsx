@@ -10,6 +10,7 @@ import { FeaturedVehicles } from "@/components/featured-vehicles"
 import { TopTours } from "@/components/top-tours"
 import { WhatsAppButton } from "@/components/cta-elements"
 import { AuthGateModal } from "@/components/auth-gate-modal"
+import { ChatBot } from "@/components/chat-bot"
 import { MapPin, Phone, Shield, Clock } from "lucide-react"
 import Link from "next/link"
 
@@ -114,6 +115,7 @@ export default function HomePage() {
 
       <WhatsAppButton />
       <BottomNav />
+      <ChatBot />
       <AuthGateModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   )

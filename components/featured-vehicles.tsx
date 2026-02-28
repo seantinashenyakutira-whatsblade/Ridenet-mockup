@@ -40,7 +40,7 @@ export function FeaturedVehicles() {
                 </div>
               )}
               <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-lg px-2 py-1">
-                <span className="text-xs font-bold text-primary">${v.pricePerDay}/day</span>
+                <span className="text-xs font-bold text-primary">ZMW {v.pricePerDay}/day</span>
               </div>
             </div>
 
@@ -66,11 +66,10 @@ export function FeaturedVehicles() {
 
               <Link
                 href={v.available ? `/booking?tab=rentals&vehicle=${v.id}` : "#"}
-                className={`mt-3 w-full block text-center text-xs font-semibold py-2 rounded-lg transition-colors ${
-                  v.available
+                className={`mt-3 w-full block text-center text-xs font-semibold py-2 rounded-lg transition-colors ${v.available
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
+                  }`}
               >
                 {v.available ? "Reserve" : "Unavailable"}
               </Link>
