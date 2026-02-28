@@ -19,7 +19,7 @@ export default function AdminSettingsPage() {
     businessName: "RideNet Solution",
     tagline: "Transport, Tours & Logistics — Zambia",
     phone: "+260 97 123 4567",
-    whatsapp: "260971234567",
+    whatsapp: "260776950796",
     email: "info@ridenet.co.zm",
     address: "Plot 12, Cairo Road, Lusaka, Zambia",
     website: "https://ridenet.co.zm",
@@ -165,16 +165,14 @@ export default function AdminSettingsPage() {
                   role="switch"
                   aria-checked={form[n.key as keyof typeof form] as boolean}
                   onClick={() => set(n.key, !form[n.key as keyof typeof form])}
-                  className={`mt-0.5 relative shrink-0 w-9 h-5 rounded-full border transition-colors ${
-                    form[n.key as keyof typeof form]
+                  className={`mt-0.5 relative shrink-0 w-9 h-5 rounded-full border transition-colors ${form[n.key as keyof typeof form]
                       ? "bg-primary border-primary"
                       : "bg-muted border-border"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                      form[n.key as keyof typeof form] ? "translate-x-4" : "translate-x-0"
-                    }`}
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form[n.key as keyof typeof form] ? "translate-x-4" : "translate-x-0"
+                      }`}
                   />
                 </button>
                 <div>

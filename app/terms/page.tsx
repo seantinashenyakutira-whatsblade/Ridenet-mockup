@@ -26,7 +26,7 @@ export default function TermsPage() {
                 <p className="mb-4">We respect your privacy. All data collected, including names and phone numbers, are only used for providing and improving our services.</p>
 
                 <h2 className="text-foreground font-semibold">5. Contact Us</h2>
-                <p className="mb-4">If you have any questions, you can contact our support team at support@ridenet.co.zm.</p>
+                <p className="mb-4">If you have any questions, you can contact our support team at info@ridenetzm.com.</p>
             </div>
 
             <BottomNav />

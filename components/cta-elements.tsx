@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { MessageCircle, ArrowRight } from "lucide-react"
 
-const WHATSAPP_NUMBER = "260971234567"
+const WHATSAPP_NUMBER = "260776950796"
 const WHATSAPP_MSG = encodeURIComponent("Hi RideNet! I'd like to make a booking.")
 
 export function WhatsAppButton() {

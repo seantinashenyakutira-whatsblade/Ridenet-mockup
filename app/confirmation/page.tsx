@@ -26,7 +26,7 @@ function ConfirmationContent() {
     setTimeout(() => setShowPayment(true), 1500)
   }, [])
 
-  const WHATSAPP_NUMBER = "260971234567"
+  const WHATSAPP_NUMBER = "260776950796"
   const whatsappMsg = encodeURIComponent(
     `Hi RideNet! My booking reference is ${ref} for ${type}. Please confirm my booking.`
   )

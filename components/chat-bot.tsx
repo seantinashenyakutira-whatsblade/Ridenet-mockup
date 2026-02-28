@@ -12,7 +12,7 @@ const DEMO_RESPONSES: Record<string, string> = {
     car: "We have sedans (Toyota Corolla – ZMW 85/day), SUVs (Fortuner – ZMW 180/day), luxury (Land Cruiser – ZMW 320/day), vans (Hiace – ZMW 220/day), and trucks (Ranger – ZMW 150/day).",
     airport: "We offer airport transfers to/from Kenneth Kaunda International Airport, Harry Mwaanga Nkumbula Airport, and other major airports across Zambia. Starting from ZMW 200.",
     tour: "We offer day trips to Victoria Falls, Lower Zambezi safaris (3 days), South Luangwa (5 days), and Lusaka city tours. All inclusive packages available. Check our Tours section!",
-    contact: "You can reach us on WhatsApp at +260 97 123 4567, or email support@ridenet.co.zm. We're available 24/7!",
+    contact: "You can reach us on WhatsApp at +260 77 695 0796, or email info@ridenetzm.com. We're available 24/7!",
     hello: "Hello there! 👋 Welcome to RideNet Solutions — Zambia's premier transport network. How can I assist you today?",
     zmw: "All our prices are quoted in ZMW (Zambian Kwacha). We accept Mobile Money (MTN, Airtel, Zamtel) and major credit/debit cards.",
 }
@@ -86,8 +86,8 @@ export function ChatBot() {
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                                 <div className={`text-xs px-3 py-2 rounded-2xl max-w-[85%] leading-relaxed ${m.role === "user"
-                                        ? "bg-primary text-primary-foreground rounded-br-sm"
-                                        : "bg-muted text-foreground rounded-bl-sm"
+                                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                                    : "bg-muted text-foreground rounded-bl-sm"
                                     }`}>
                                     {m.text}
                                 </div>

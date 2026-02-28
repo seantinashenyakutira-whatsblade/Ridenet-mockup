@@ -24,7 +24,7 @@ export default function SupportPage() {
                             <p className="text-sm text-muted-foreground">Fastest reply</p>
                         </div>
                     </div>
-                    <a href="https://wa.me/260971234567" target="_blank" rel="noreferrer" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="https://wa.me/260776950796" target="_blank" rel="noreferrer" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
                         Chat
                     </a>
                 </div>
@@ -39,7 +39,7 @@ export default function SupportPage() {
                             <p className="text-sm text-muted-foreground">24/7 available</p>
                         </div>
                     </div>
-                    <a href="tel:+260971234567" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="tel:+260776950796" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
                         Call
                     </a>
                 </div>
@@ -54,7 +54,7 @@ export default function SupportPage() {
                             <p className="text-sm text-muted-foreground">For complex queries</p>
                         </div>
                     </div>
-                    <a href="mailto:support@ridenet.co.zm" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="mailto:info@ridenetzm.com" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
                         Email
                     </a>
                 </div>
