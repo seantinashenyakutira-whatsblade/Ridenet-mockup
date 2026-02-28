@@ -27,8 +27,11 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
 
   const handleVerifyOtp = () => {
     if (otp.length === 6) {
-      onClose()
+      // Works for both real Firebase OTP and mock mode
+      localStorage.setItem('mockUser', 'signed_in')
       onSuccess?.()
+      onClose()
+      window.location.reload()
     }
   }
 
@@ -90,7 +93,12 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
 
               {/* Google */}
               <button
-                onClick={() => { onClose(); onSuccess?.() }}
+                onClick={() => {
+                  localStorage.setItem('mockUser', 'signed_in')
+                  onSuccess?.()
+                  onClose()
+                  window.location.reload()
+                }}
                 className="flex items-center gap-3 w-full bg-secondary border border-border text-foreground font-semibold text-sm py-3 px-4 rounded-xl hover:bg-muted transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
