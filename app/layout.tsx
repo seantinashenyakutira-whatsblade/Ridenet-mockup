@@ -13,12 +13,19 @@ export const metadata: Metadata = {
   title: 'RideNet Solution — Transport, Tours & Logistics | Zambia',
   description: 'Book car rentals, airport transfers, city tours, safari arrangements, corporate transport, and freight forwarding in Zambia. Fast, reliable, and professional.',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'RideNet',
+  },
 }
 
 export const viewport: Viewport = {
   themeColor: '#18A558',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({
@@ -32,6 +39,23 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+
+        {/* PWA Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered: ', registration.scope);
+                  }, function(err) {
+                    console.log('SW registration failed: ', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   )
