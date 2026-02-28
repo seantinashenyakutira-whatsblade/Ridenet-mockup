@@ -27,8 +27,8 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
 
   const handleVerifyOtp = () => {
     if (otp.length === 6) {
-      // Works for both real Firebase OTP and mock mode
       localStorage.setItem('mockUser', 'signed_in')
+      localStorage.setItem('mockRole', 'user')  // Phone always = regular user
       onSuccess?.()
       onClose()
       window.location.reload()
@@ -39,6 +39,9 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
     if (email && password.length >= 6) {
       if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
         localStorage.setItem('mockUser', 'signed_in');
+        // admin@ridenet.co.zm = admin, everything else = regular user
+        const role = email.trim() === 'admin@ridenet.co.zm' ? 'admin' : 'user'
+        localStorage.setItem('mockRole', role);
         onSuccess?.();
         onClose();
         window.location.reload();
@@ -95,6 +98,7 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
               <button
                 onClick={() => {
                   localStorage.setItem('mockUser', 'signed_in')
+                  localStorage.setItem('mockRole', 'user')  // Google = regular user
                   onSuccess?.()
                   onClose()
                   window.location.reload()
@@ -123,6 +127,13 @@ export function AuthGateModal({ open, onClose, onSuccess, message }: AuthGatePro
                 By continuing you agree to our{" "}
                 <Link href="/terms" className="text-primary underline cursor-pointer" onClick={onClose}>Terms of Service</Link>
               </p>
+              {/* Prototype hint */}
+              <div className="bg-muted/60 rounded-xl p-3 mt-1 text-[11px] text-muted-foreground space-y-0.5">
+                <p className="font-semibold text-foreground">🧪 Prototype test accounts (Email login):</p>
+                <p>👤 <b>Client:</b> user@test.com / <b>any password</b></p>
+                <p>🔑 <b>Admin:</b> admin@ridenet.co.zm / <b>any password</b></p>
+                <p className="mt-1 opacity-70">Google &amp; Phone → signs in as regular user</p>
+              </div>
             </div>
           )}
 

@@ -20,8 +20,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-// Expose a custom hook
 export const useAuth = () => useContext(AuthContext);
+
+const isMockMode = () =>
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" ||
+    !process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -39,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUserData(data);
                 setIsAdmin(!!data.isAdmin);
             } else {
-                // Create basic user doc
                 const newUserData = {
                     email: currentUser.email,
                     phone: currentUser.phoneNumber,
@@ -57,24 +59,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
+        if (isMockMode()) {
+            // ── MOCK MODE ──────────────────────────────────────────────
+            const signedIn = typeof window !== 'undefined' && localStorage.getItem('mockUser') === 'signed_in';
+            const role = typeof window !== 'undefined' ? localStorage.getItem('mockRole') : 'user';
+            const adminMode = role === 'admin';
+
+            if (signedIn) {
+                const mockEmail = adminMode ? 'admin@ridenet.co.zm' : 'user@test.com';
+                const mockName = adminMode ? 'Mock Admin' : 'Mock Client';
+                setUser({ uid: adminMode ? 'mock-admin-123' : 'mock-user-456', email: mockEmail, displayName: mockName } as User);
+                setUserData({ name: mockName, email: mockEmail, phone: '+260971234567', isAdmin: adminMode });
+                setIsAdmin(adminMode);
+            } else {
+                setUser(null);
+                setUserData(null);
+                setIsAdmin(false);
+            }
+            setLoading(false);
+            return;
+        }
+
+        // ── REAL FIREBASE ──────────────────────────────────────────────
         let unsubscribe = () => { };
         try {
-            if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-                // We are in mock mode, so let's mock the user
-                const isMockSignedIn = typeof window !== 'undefined' && localStorage.getItem('mockUser') === 'signed_in';
-                if (isMockSignedIn) {
-                    setUser({ uid: 'mock-123', email: 'admin@ridenet.co.zm', displayName: "Mock Admin" } as User);
-                    setUserData({ name: "Mock Admin", email: "admin@ridenet.co.zm", phone: "+260971234567" });
-                    setIsAdmin(true);
-                } else {
-                    setUser(null);
-                    setUserData(null);
-                    setIsAdmin(false);
-                }
-                setLoading(false);
-                return;
-            }
-
             unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
                 setUser(currentUser);
                 if (currentUser) {
@@ -86,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setLoading(false);
             });
         } catch (e) {
-            console.warn("Firebase Auth Error: mock config?", e);
+            console.warn("Firebase Auth Error:", e);
             setLoading(false);
         }
         return () => unsubscribe();
@@ -132,15 +140,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signOut = async () => {
+        if (isMockMode()) {
+            localStorage.removeItem('mockUser');
+            localStorage.removeItem('mockRole');
+            setUser(null);
+            setUserData(null);
+            setIsAdmin(false);
+            window.location.reload();
+            return;
+        }
         try {
-            if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === "mock-api-key" || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-                localStorage.removeItem('mockUser');
-                setUser(null);
-                setUserData(null);
-                setIsAdmin(false);
-                window.location.reload();
-                return;
-            }
             await firebaseSignOut(auth);
         } catch (error) {
             console.error("Sign-out Error:", error);
