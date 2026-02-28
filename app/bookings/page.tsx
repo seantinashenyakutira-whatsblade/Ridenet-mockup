@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext"
 import { AuthGateModal } from "@/components/auth-gate-modal"
 import { useState, useEffect } from "react"
 import { CalendarDays, Package } from "lucide-react"
+import { ChatBot } from "@/components/chat-bot"
 
 export default function BookingsPage() {
     const { user, loading } = useAuth()
@@ -30,7 +31,7 @@ export default function BookingsPage() {
                     </p>
                     <button
                         onClick={() => setShowAuthGate(true)}
-                        className="bg-primary text-primary-foreground px-6 py-2 rounded-xl"
+                        className="bg-accent text-white font-semibold px-6 py-2 rounded-xl hover:bg-accent/80 transition-colors"
                     >
                         Sign In
                     </button>
@@ -45,6 +46,7 @@ export default function BookingsPage() {
             )}
 
             <BottomNav />
+            <ChatBot />
             {showAuthGate && (
                 <AuthGateModal open={showAuthGate} onClose={() => setShowAuthGate(false)} />
             )}

@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext"
 import { AuthGateModal } from "@/components/auth-gate-modal"
 import { useState, useEffect } from "react"
 import { HeadphonesIcon, MessageCircle, Mail, Phone } from "lucide-react"
+import { ChatBot } from "@/components/chat-bot"
 
 export default function SupportPage() {
     const { user } = useAuth()
@@ -16,15 +17,15 @@ export default function SupportPage() {
             <div className="space-y-6">
                 <div className="bg-card border border-border p-5 rounded-2xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 p-3 rounded-full text-primary">
+                        <div className="bg-accent/10 p-3 rounded-full text-accent">
                             <MessageCircle className="w-6 h-6" />
                         </div>
                         <div>
                             <h3 className="font-semibold text-foreground">WhatsApp Us</h3>
-                            <p className="text-sm text-muted-foreground">Fastest reply</p>
+                            <p className="text-sm text-muted-foreground">Fastest reply · +260 77 695 0796</p>
                         </div>
                     </div>
-                    <a href="https://wa.me/260776950796" target="_blank" rel="noreferrer" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="https://wa.me/260776950796" target="_blank" rel="noreferrer" className="text-white font-bold text-sm bg-accent hover:bg-accent/80 transition-colors px-4 py-2 rounded-xl">
                         Chat
                     </a>
                 </div>
@@ -36,25 +37,25 @@ export default function SupportPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold text-foreground">Call Support</h3>
-                            <p className="text-sm text-muted-foreground">24/7 available</p>
+                            <p className="text-sm text-muted-foreground">24/7 available · +260 77 695 0796</p>
                         </div>
                     </div>
-                    <a href="tel:+260776950796" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="tel:+260776950796" className="text-accent font-bold text-sm border border-accent/40 bg-accent/10 hover:bg-accent/20 transition-colors px-4 py-2 rounded-xl">
                         Call
                     </a>
                 </div>
 
                 <div className="bg-card border border-border p-5 rounded-2xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 p-3 rounded-full text-primary">
+                        <div className="bg-muted p-3 rounded-full text-muted-foreground">
                             <Mail className="w-6 h-6" />
                         </div>
                         <div>
                             <h3 className="font-semibold text-foreground">Email Us</h3>
-                            <p className="text-sm text-muted-foreground">For complex queries</p>
+                            <p className="text-sm text-muted-foreground">info@ridenetzm.com</p>
                         </div>
                     </div>
-                    <a href="mailto:info@ridenetzm.com" className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-xl">
+                    <a href="mailto:info@ridenetzm.com" className="text-foreground font-bold text-sm bg-muted hover:bg-muted/70 transition-colors px-4 py-2 rounded-xl">
                         Email
                     </a>
                 </div>
@@ -62,6 +63,7 @@ export default function SupportPage() {
             </div>
 
             <BottomNav />
+            <ChatBot />
             {showAuthGate && (
                 <AuthGateModal open={showAuthGate} onClose={() => setShowAuthGate(false)} />
             )}

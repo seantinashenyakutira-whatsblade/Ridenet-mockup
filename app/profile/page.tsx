@@ -5,6 +5,7 @@ import { AuthGateModal } from "@/components/auth-gate-modal"
 import { useState, useEffect } from "react"
 import { User, LogOut, Settings, CreditCard, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { ChatBot } from "@/components/chat-bot"
 
 export default function ProfilePage() {
     const { user, loading, userData, signOut, isAdmin } = useAuth()
@@ -93,6 +94,7 @@ export default function ProfilePage() {
             )}
 
             <BottomNav />
+            <ChatBot />
             {showAuthGate && (
                 <AuthGateModal open={showAuthGate} onClose={() => setShowAuthGate(false)} />
             )}
