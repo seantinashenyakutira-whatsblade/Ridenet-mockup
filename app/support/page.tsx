@@ -26,6 +26,18 @@ export default function SupportPage() {
                 <h1 className="text-2xl font-bold mb-2">Support</h1>
                 <p className="text-sm text-muted-foreground mb-6">We&apos;re here to help 24/7. Reach out any way you prefer.</p>
 
+                {/* ── AI CHAT WIDGET ── */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-3">
+                        <h2 className="text-lg font-bold text-foreground">Chat with RideNet Support Bot</h2>
+                        <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full">AI</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-4">
+                        Ask about pricing, bookings, or services. For anything outside our knowledge base, the bot will direct you to our team.
+                    </p>
+                    <SupportChatWidget />
+                </div>
+
                 {/* Contact cards */}
                 <div className="space-y-3 mb-8">
                     <div className="bg-card border border-border p-5 rounded-2xl flex items-center justify-between">
@@ -75,18 +87,6 @@ export default function SupportPage() {
                             Email
                         </a>
                     </div>
-                </div>
-
-                {/* ── AI CHAT WIDGET ── */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-2 mb-3">
-                        <h2 className="text-lg font-bold text-foreground">Chat with RideNet Support Bot</h2>
-                        <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full">AI</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-4">
-                        Ask about pricing, bookings, or services. For anything outside our knowledge base, the bot will direct you to our team.
-                    </p>
-                    <SupportChatWidget />
                 </div>
             </div>
 
