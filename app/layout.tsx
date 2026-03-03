@@ -33,6 +33,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
 }
 
+import { OfflineBanner } from '@/components/offline-banner'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,6 +44,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
         <Providers>
+          <OfflineBanner />
           {children}
         </Providers>
 

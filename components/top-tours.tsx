@@ -41,9 +41,9 @@ export function TopTours() {
               )}
 
               {/* Price */}
-              <div className="absolute bottom-2 left-3">
-                <span className="text-xs text-muted-foreground">From</span>
-                <p className="text-sm font-bold text-foreground">${t.fromPrice}</p>
+              <div className="absolute bottom-2 left-3 text-white">
+                <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider">From</span>
+                <p className="text-sm font-black text-primary">ZMW {t.fromPrice}</p>
               </div>
             </div>
 

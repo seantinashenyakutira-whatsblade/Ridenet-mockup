@@ -2,205 +2,122 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { Users, Fuel, Settings2, CheckCircle2, X, MapPin, Calendar, Star, ChevronDown } from "lucide-react"
+import { Users, Fuel, Settings2, Edit3, ShieldAlert } from "lucide-react"
 import { vehicles, type Vehicle } from "@/lib/mock-data"
 import { useAuth } from "@/lib/AuthContext"
 import { AuthGateModal } from "@/components/auth-gate-modal"
-
-function daysBetween(a: string, b: string): number {
-  if (!a || !b) return 0
-  const diff = new Date(b).getTime() - new Date(a).getTime()
-  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)))
-}
+import { VehicleBookingModal } from "./vehicle-booking-modal"
+import { VehicleEditModal } from "../admin/vehicle-edit-modal"
 
 export function RentalsTab() {
-  const router = useRouter()
-  const { user, userData } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [filter, setFilter] = useState<string>("all")
   const [bookingVehicle, setBookingVehicle] = useState<Vehicle | null>(null)
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
+  const [localVehicles, setLocalVehicles] = useState<Vehicle[]>(vehicles)
   const [showAuth, setShowAuth] = useState(false)
-  const [form, setForm] = useState({
-    name: "", phone: "", pickup: "", dropoffDate: "", pickupDate: "", pickupLocation: ""
-  })
-  const [submitted, setSubmitted] = useState(false)
 
   const categories = ["all", "sedan", "suv", "luxury", "van", "truck"]
-  const filtered = filter === "all" ? vehicles : vehicles.filter(v => v.category === filter)
-
-  const days = daysBetween(form.pickupDate, form.dropoffDate)
-  const total = bookingVehicle ? bookingVehicle.pricePerDay * days : 0
+  const filtered = filter === "all" ? localVehicles : localVehicles.filter(v => v.category === filter)
 
   const openBooking = (v: Vehicle) => {
     if (!user) { setShowAuth(true); return }
-    setForm({
-      name: userData?.name || "",
-      phone: userData?.phone || "",
-      pickup: "",
-      dropoffDate: "",
-      pickupDate: "",
-      pickupLocation: "",
-    })
-    setSubmitted(false)
     setBookingVehicle(v)
   }
 
-  const handleReserve = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!bookingVehicle) return
-    const params = new URLSearchParams({
-      type: "Car Rental",
-      detail: `${bookingVehicle.name} – ${days} day${days > 1 ? "s" : ""}`,
-      date: form.pickupDate,
-      name: form.name,
-      vehicle: bookingVehicle.id,
-    })
-    setBookingVehicle(null)
-    router.push(`/confirmation?${params.toString()}`)
+  const handleEditSave = (updated: Vehicle) => {
+    setLocalVehicles(prev => prev.map(v => v.id === updated.id ? updated : v))
   }
 
   return (
-    <div>
+    <div className="animate-in fade-in duration-500">
+      {/* Admin Notice */}
+      {isAdmin && (
+        <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-5 h-5 text-rose-500" />
+            <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Admin Edit Mode Active</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground font-medium italic">Tap edit icon to modify fleet</p>
+        </div>
+      )}
+
       {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-2 no-scrollbar">
         {categories.map(c => (
           <button key={c} onClick={() => setFilter(c)}
-            className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border capitalize transition-colors ${filter === c ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border hover:border-primary"}`}>
+            className={`shrink-0 text-[10px] font-bold px-4 py-2 rounded-full border uppercase tracking-widest transition-all ${filter === c ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" : "bg-card text-muted-foreground border-border hover:border-primary/50"}`}>
             {c}
           </button>
         ))}
       </div>
 
       {/* Vehicle grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {filtered.map(v => (
-          <button key={v.id} disabled={!v.available} onClick={() => openBooking(v)}
-            className={`text-left bg-card border rounded-xl overflow-hidden transition-all duration-200 ${v.available ? "border-border hover:border-primary/60 hover:shadow-md" : "border-border opacity-50 cursor-not-allowed"}`}>
-            <div className="relative h-36">
-              <Image src={v.image} alt={v.name} fill className="object-cover" sizes="(max-width:640px) 100vw,33vw" />
-              <div className="absolute top-2 right-2 bg-background/85 backdrop-blur-sm rounded-lg px-2 py-0.5">
-                <span className="text-xs font-bold text-primary">ZMW {v.pricePerDay}/day</span>
-              </div>
-              {!v.available && (
-                <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                  <span className="text-xs font-semibold border border-border rounded-full px-3 py-1 bg-card">Unavailable</span>
+          <div key={v.id} className="relative group">
+            <button disabled={!v.available && !isAdmin} onClick={() => openBooking(v)}
+              className={`w-full text-left bg-card border rounded-2xl overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/5 ${v.available ? "border-border hover:border-primary/50" : "border-border opacity-60"}`}>
+              <div className="relative h-44">
+                <Image src={v.image} alt={v.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width:640px) 100vw,33vw" />
+                <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-md rounded-xl px-2.5 py-1.5 shadow-lg border border-border transition-transform group-hover:scale-110">
+                  <span className="text-xs font-black text-primary">ZMW {v.pricePerDay}<span className="text-[10px] text-muted-foreground font-normal ml-0.5">/day</span></span>
                 </div>
-              )}
-            </div>
-            <div className="p-3">
-              <p className="text-sm font-semibold text-foreground">{v.name}</p>
-              <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" />{v.seats}</span>
-                <span className="flex items-center gap-1"><Settings2 className="w-3 h-3" />{v.transmission}</span>
-                <span className="flex items-center gap-1"><Fuel className="w-3 h-3" />{v.fuel}</span>
+                {!v.available && (
+                  <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center">
+                    <span className="text-xs font-bold border border-border rounded-full px-4 py-1 bg-card/90 shadow-xl uppercase tracking-tighter">Unavailable</span>
+                  </div>
+                )}
               </div>
-              {v.available && (
-                <div className="mt-2 text-xs text-primary font-semibold">Tap to book →</div>
-              )}
-            </div>
-          </button>
+              <div className="p-4">
+                <p className="text-sm font-bold text-foreground leading-tight">{v.name}</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-1">{v.brand} • {v.category}</p>
+
+                <div className="flex gap-4 mt-4 text-[10px] font-medium text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary" />{v.seats} Seats</span>
+                  <span className="flex items-center gap-1.5"><Settings2 className="w-3.5 h-3.5 text-primary" />{v.transmission}</span>
+                  <span className="flex items-center gap-1.5"><Fuel className="w-3.5 h-3.5 text-primary" />{v.fuel}</span>
+                </div>
+
+                {v.available && (
+                  <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest group-hover:underline">Reserve Now →</span>
+                  </div>
+                )}
+              </div>
+            </button>
+
+            {/* Admin Edit Trigger */}
+            {isAdmin && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setEditingVehicle(v); }}
+                className="absolute top-3 left-3 w-9 h-9 bg-rose-500 text-white rounded-xl flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors z-10"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         ))}
       </div>
 
-      {/* ── BOOKING MODAL ─────────────────────────────────── */}
+      {/* Booking Modal */}
       {bookingVehicle && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setBookingVehicle(null)} />
-          <div className="relative w-full max-w-md bg-card border border-border rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Close */}
-            <button onClick={() => setBookingVehicle(null)} className="absolute top-3 right-3 z-10 w-8 h-8 bg-muted/80 rounded-full flex items-center justify-center">
-              <X className="w-4 h-4" />
-            </button>
-
-            {/* Vehicle hero */}
-            <div className="relative h-44">
-              <Image src={bookingVehicle.image} alt={bookingVehicle.name} fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-              <div className="absolute bottom-3 left-4">
-                <p className="text-lg font-bold text-white">{bookingVehicle.name}</p>
-                <p className="text-sm text-white/80">{bookingVehicle.brand} • {bookingVehicle.category}</p>
-              </div>
-            </div>
-
-            {/* Specs + pricing */}
-            <div className="px-4 py-3 border-b border-border bg-muted/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{bookingVehicle.seats} seats</span>
-                  <span className="flex items-center gap-1"><Settings2 className="w-3.5 h-3.5" />{bookingVehicle.transmission}</span>
-                  <span className="flex items-center gap-1"><Fuel className="w-3.5 h-3.5" />{bookingVehicle.fuel}</span>
-                </div>
-                <span className="text-sm font-bold text-primary">ZMW {bookingVehicle.pricePerDay}<span className="text-xs font-normal text-muted-foreground">/day</span></span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {bookingVehicle.features.map(f => (
-                  <span key={f} className="text-[10px] bg-primary/10 text-primary rounded-full px-2 py-0.5">{f}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleReserve} className="p-4 space-y-3">
-              <p className="text-sm font-bold text-foreground">Your Details</p>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Full Name</label>
-                <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Full name" className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Phone / WhatsApp</label>
-                <input required value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  placeholder="+260 97 000 0000" className="w-full bg-input border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Pickup Location</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input required value={form.pickupLocation} onChange={e => setForm(f => ({ ...f, pickupLocation: e.target.value }))}
-                    placeholder="e.g. Lusaka CBD, Airport, Hotel..." className="w-full bg-input border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Pickup Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input required type="date" value={form.pickupDate} min={new Date().toISOString().split("T")[0]}
-                      onChange={e => setForm(f => ({ ...f, pickupDate: e.target.value }))}
-                      className="w-full bg-input border border-border rounded-xl pl-9 pr-2 py-2.5 text-sm focus:outline-none focus:border-primary" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Return Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input required type="date" value={form.dropoffDate} min={form.pickupDate || new Date().toISOString().split("T")[0]}
-                      onChange={e => setForm(f => ({ ...f, dropoffDate: e.target.value }))}
-                      className="w-full bg-input border border-border rounded-xl pl-9 pr-2 py-2.5 text-sm focus:outline-none focus:border-primary" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Price summary */}
-              {days > 0 && (
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 text-sm">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>ZMW {bookingVehicle.pricePerDay} × {days} day{days > 1 ? "s" : ""}</span>
-                    <span className="font-bold text-foreground">ZMW {total}</span>
-                  </div>
-                </div>
-              )}
-
-              <button type="submit" className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-xl hover:bg-primary/90 transition-colors">
-                {days > 0 ? `Reserve – ZMW ${total}` : "Reserve Now"}
-              </button>
-            </form>
-          </div>
-        </div>
+        <VehicleBookingModal
+          vehicle={bookingVehicle}
+          onClose={() => setBookingVehicle(null)}
+        />
       )}
 
-      {/* Auth gate for non signed in users */}
+      {/* Admin Edit Modal */}
+      {editingVehicle && (
+        <VehicleEditModal
+          vehicle={editingVehicle}
+          onClose={() => setEditingVehicle(null)}
+          onSave={handleEditSave}
+        />
+      )}
+
+      {/* Auth gate */}
       {showAuth && <AuthGateModal open={showAuth} onClose={() => setShowAuth(false)} message="Sign in to reserve a vehicle" />}
     </div>
   )
