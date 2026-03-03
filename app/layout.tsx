@@ -19,6 +19,11 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'RideNet',
   },
+  icons: {
+    icon: '/images/logo.png',
+    shortcut: '/images/logo.png',
+    apple: '/images/logo.png',
+  },
 }
 
 export const viewport: Viewport = {
